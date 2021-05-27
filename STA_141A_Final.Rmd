@@ -5,6 +5,17 @@ date: "5/23/2021"
 output: html_document
 ---
 
+
+## Background
+
+Introduce each variable and describe the possible effects it will have on it with our predictions on what will happen
+
+## Questions of Interest
+
+## Analysis Overview
+
+## Results
+
 ## Importing Dataset
 
 Here is our imported dataset.
@@ -83,3 +94,50 @@ student_data$romantic
 ```
 
 Note: check a relationship between internet and grades. 
+
+```{r}
+View(student_data)
+```
+
+
+## Simple Linear Regression to study the relationship between absences and grades
+
+```{r}
+attach(student_data)
+```
+
+```{r}
+linear_model = lm(G3~absences)
+summary(linear_model)
+```
+
+Absences is clearly significant, and we can conclude that the coefficient for absences is nonzero. The regression equation from the model is G3 = 12.13880 - 0.06361*absences
+
+Low R-squared
+
+
+
+
+
+```{r}
+plot(linear_model)
+```
+
+Points are approximately normally distributed
+There seems to be 2 leverage points
+Residual assumptions seem to be violated
+
+## Logistic model with Internet and G3
+
+```{r}
+logistic_model =glm(G3~internet)
+logistic_model
+```
+
+```{r}
+summary(logistic_model)
+```
+
+
+
+
