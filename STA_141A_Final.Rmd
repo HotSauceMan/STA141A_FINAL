@@ -1,0 +1,85 @@
+---
+title: "Student_Por"
+author: "Ambar Mishra"
+date: "5/23/2021"
+output: html_document
+---
+
+## Importing Dataset
+
+Here is our imported dataset.
+
+```{r}
+student_data <- read.csv('student-por.csv')
+```
+
+# Data Cleaning
+
+Here is our data cleaning section. Our first step of data cleaning was to convert the "yes" and "no"'s into 0's and 1's. 
+
+
+## Schoolsup Column 
+
+School sup column is extra educational support. 
+
+```{r}
+student_data$schoolsup <- ifelse(student_data$schoolsup == 'yes', 1, 0)
+student_data$schoolsup
+```
+
+## Famsup column
+
+Family sup column is for extra family support
+
+```{r}
+student_data$famsup <- ifelse(student_data$famsup == 'yes', 1, 0)
+student_data$famsup
+```
+
+
+## Paid column
+
+Paid column is for extra paid classes for course subjects. 
+
+```{r}
+student_data$paid <- ifelse(student_data$paid == 'yes', 1, 0)
+student_data$paid
+```
+
+
+## Activities column
+
+```{r}
+student_data$activities <- ifelse(student_data$activities == 'yes', 1, 0)
+student_data$activities
+```
+
+## Nursery Column
+
+```{r}
+student_data$nursery <- ifelse(student_data$nursery == 'yes', 1, 0)
+student_data$nursery
+```
+
+## Higher Column
+
+```{r}
+student_data$higher <- ifelse(student_data$higher == 'yes', 1, 0)
+student_data$higher
+```
+
+## Internet Column 
+
+```{r}
+student_data$internet <- ifelse(student_data$internet == 'yes', 1, 0)
+student_data$internet
+```
+
+## Romantic Column
+
+```{r}
+student_data$romantic <- ifelse(student_data$romantic == 'yes', 1, 0)
+student_data$romantic
+```
+
+Note: check a relationship between internet and grades. 
