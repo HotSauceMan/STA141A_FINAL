@@ -123,19 +123,69 @@ Low R-squared
 plot(linear_model)
 ```
 
-Points are approximately normally distributed
-There seems to be 2 leverage points
-Residual assumptions seem to be violated
+We can see that in the normal qq plot, there is a problem with the left tail, since many points are not on the dotted dashed line. Clearly, some data points are affecting the normal distribution assumption, and we hypothesize that it is the data points with 0 as the grade. We can take a look at the number of people who receive a 0 as their grade.
+
+```{r}
+nrow(student_data[G3 == 0,])
+```
+
+
+15 of the grades are considered to be zeroes, which clearly affects the distribution of the grades. We can see these 15 points on the normal qq plot that greatly affects the left tail.
+
+```{r}
+hist(G3)
+```
+
+We can also see this in the histogram, where without the zeroes, the data for the final grade seems approximately normally distributed.
+
+We can assume that the grades were either misreported or if the students received a 0 for a particular reason. Either way, these students are outliers in the dataset. We shall remove the outliers with a grade of 0 to see if our model fit and assumptions will be better. 
+
+```{r}
+student_data_no_zeroes = student_data[-c(which(G3 == 0)),]
+```
+
+Here is the new dataset we will be working with that contains no zeroes for the final grade. We now will run the linear model we did previoulsy and compare the two models. 
+
+```{r}
+attach(student_data_no_zeroes)
+```
+
+```{r}
+linear_model_2 = lm(G3~absences)
+summary(linear_model_2)
+```
+
+We can see that the coefficient for absences has become more significant with a p-value of 6.54e-07, which suggests that there is enough evidence for the coefficient of absences to be non-zero. The F-statistics also increased as well as the multiple r squared.
+
+```{r}
+hist(G3)
+```
+
+Clearly, the histogram of the final grade is much better than before.
+
+```{r}
+plot(linear_model_2)
+```
+
+We can see that after removing the outliers, the assumption of normality is met. In addition, for the residual plot the assumption of constant error variance and independence is met. Since removing the students who received a 0 for their final grade are clearly outliers and affect our model greatly, we will continue with the subset of the data without zeroes in the grades when adding other variables into the model.
+
+
+
+
 
 ## Logistic model with Internet and G3
 
 ```{r}
-logistic_model =glm(G3~internet)
+logistic_model =glm(internet~G3, family = "binomial")
 logistic_model
 ```
 
 ```{r}
 summary(logistic_model)
+```
+
+```{r}
+prob = predict(logistic_model, type = "response")
 ```
 
 
