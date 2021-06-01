@@ -114,9 +114,13 @@ ggplot(student_data,aes(x = absences, y = G3)) + geom_point(color = "blue") + ge
 
 ```{r}
 student_data_numeric = cbind(age, absences,G3)
-cor(student_data_numeric)
+cor = cor(student_data_numeric)
+cor
 ```
 
+```{r}
+corrplot(cor)
+```
 
 
 
