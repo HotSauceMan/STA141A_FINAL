@@ -93,11 +93,7 @@ student_data$romantic <- ifelse(student_data$romantic == 'yes', 1, 0)
 student_data$romantic
 ```
 
-Note: check a relationship between internet and grades. 
 
-```{r}
-View(student_data)
-```
 
 
 ## Simple Linear Regression to study the relationship between absences and grades
@@ -106,8 +102,26 @@ View(student_data)
 attach(student_data)
 ```
 
+
+
+
+
+
 ```{r}
-linear_model = lm(G3~absences)
+ggplot(student_data,aes(x = absences, y = G3)) + geom_point(color = "blue") + geom_smooth()
+```
+
+
+```{r}
+student_data_numeric = cbind(age, absences,G3)
+cor(student_data_numeric)
+```
+
+
+
+
+```{r}
+linear_model = lm(G3~age)
 summary(linear_model)
 ```
 
@@ -144,14 +158,37 @@ We can assume that the grades were either misreported or if the students receive
 student_data_no_zeroes = student_data[-c(which(G3 == 0)),]
 ```
 
+```{r}
+student_data_with_zeroes = student_data[c(which(G3 == 0)),]
+```
+
 Here is the new dataset we will be working with that contains no zeroes for the final grade. We now will run the linear model we did previoulsy and compare the two models. 
+
+```{r}
+library(tidyverse)
+ggplot(student_data,aes(x = age, y = G3)) + geom_point(color = "gold")  + geom_smooth()
+```
+
+```{r}
+ggplot(student_data_no_zeroes,aes(x = age, y = G3)) + geom_point(color = "gold")  + geom_smooth()
+```
+
+```{r}
+ggplot(student_data,aes(x = absences, y = G3)) + geom_point(color = "blue")  + geom_smooth()
+```
+
+```{r}
+ggplot(student_data_no_zeroes,aes(x = absences, y = G3)) + geom_point(color = "blue")  + geom_smooth()
+```
+
+
 
 ```{r}
 attach(student_data_no_zeroes)
 ```
 
 ```{r}
-linear_model_2 = lm(G3~absences)
+linear_model_2 = lm(G3~age)
 summary(linear_model_2)
 ```
 
@@ -169,6 +206,35 @@ plot(linear_model_2)
 
 We can see that after removing the outliers, the assumption of normality is met. In addition, for the residual plot the assumption of constant error variance and independence is met. Since removing the students who received a 0 for their final grade are clearly outliers and affect our model greatly, we will continue with the subset of the data without zeroes in the grades when adding other variables into the model.
 
+
+```{r}
+attach(student_data_with_zeroes)
+hist(age)
+```
+
+
+Now we study the relationship with absences and G3 to see if the effect of the outliers
+
+
+```{r}
+attach(student_data)
+linear_model_3 = lm(G3~absences)
+summary(linear_model_3)
+```
+
+```{r}
+plot(linear_model_3)
+```
+
+```{r}
+attach(student_data_no_zeroes)
+linear_model_4 = lm(G3~absences)
+summary(linear_model_4)
+```
+
+```{r}
+plot(linear_model_4)
+```
 
 
 
