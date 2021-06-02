@@ -2,9 +2,13 @@
 title: "Student_Por"
 author: "Ambar Mishra"
 date: "5/23/2021"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message  = FALSE)
+```
 
 ## Background
 
@@ -24,6 +28,12 @@ Here is our imported dataset.
 student_data <- read.csv('student-por.csv')
 ```
 
+## Libraries
+```{r echo = TRUE,error= FALSE,warning=FALSE,message=FALSE,results="hide"}
+library(tidyverse)
+library(corrplot)
+```
+
 # Data Cleaning
 
 Here is our data cleaning section. Our first step of data cleaning was to convert the "yes" and "no"'s into 0's and 1's. 
@@ -35,7 +45,6 @@ School sup column is extra educational support.
 
 ```{r}
 student_data$schoolsup <- ifelse(student_data$schoolsup == 'yes', 1, 0)
-student_data$schoolsup
 ```
 
 ## Famsup column
@@ -44,7 +53,6 @@ Family sup column is for extra family support
 
 ```{r}
 student_data$famsup <- ifelse(student_data$famsup == 'yes', 1, 0)
-student_data$famsup
 ```
 
 
@@ -54,7 +62,6 @@ Paid column is for extra paid classes for course subjects.
 
 ```{r}
 student_data$paid <- ifelse(student_data$paid == 'yes', 1, 0)
-student_data$paid
 ```
 
 
@@ -62,35 +69,30 @@ student_data$paid
 
 ```{r}
 student_data$activities <- ifelse(student_data$activities == 'yes', 1, 0)
-student_data$activities
 ```
 
 ## Nursery Column
 
 ```{r}
 student_data$nursery <- ifelse(student_data$nursery == 'yes', 1, 0)
-student_data$nursery
 ```
 
 ## Higher Column
 
 ```{r}
 student_data$higher <- ifelse(student_data$higher == 'yes', 1, 0)
-student_data$higher
 ```
 
 ## Internet Column 
 
 ```{r}
 student_data$internet <- ifelse(student_data$internet == 'yes', 1, 0)
-student_data$internet
 ```
 
 ## Romantic Column
 
 ```{r}
 student_data$romantic <- ifelse(student_data$romantic == 'yes', 1, 0)
-student_data$romantic
 ```
 
 
@@ -98,18 +100,11 @@ student_data$romantic
 
 ## Simple Linear Regression to study the relationship between absences and grades
 
-```{r}
+```{r echo = TRUE,error= FALSE,warning=FALSE,message=FALSE,results="hide"}
 attach(student_data)
 ```
 
 
-
-
-
-
-```{r}
-ggplot(student_data,aes(x = absences, y = G3)) + geom_point(color = "blue") + geom_smooth()
-```
 
 
 ```{r}
@@ -170,24 +165,24 @@ Here is the new dataset we will be working with that contains no zeroes for the 
 
 ```{r}
 library(tidyverse)
-ggplot(student_data,aes(x = age, y = G3)) + geom_point(color = "gold")  + geom_smooth()
+ggplot(student_data,aes(x = age, y = G3)) + geom_point(color = "gold")  + geom_smooth() + ggtitle("age vs. G3 with zeroes in G3")
 ```
 
 ```{r}
-ggplot(student_data_no_zeroes,aes(x = age, y = G3)) + geom_point(color = "gold")  + geom_smooth()
+ggplot(student_data_no_zeroes,aes(x = age, y = G3)) + geom_point(color = "gold")  + geom_smooth() + ggtitle("age vs. G3 with no zeroes in G3")
 ```
 
 ```{r}
-ggplot(student_data,aes(x = absences, y = G3)) + geom_point(color = "blue")  + geom_smooth()
+ggplot(student_data,aes(x = absences, y = G3)) + geom_point(color = "blue")  + geom_smooth() + ggtitle("absences vs. G3 with zeroes in G3")
 ```
 
 ```{r}
-ggplot(student_data_no_zeroes,aes(x = absences, y = G3)) + geom_point(color = "blue")  + geom_smooth()
+ggplot(student_data_no_zeroes,aes(x = absences, y = G3)) + geom_point(color = "blue")  + geom_smooth() + ggtitle("absences vs. G3 without zeroes in G3")
 ```
 
 
 
-```{r}
+```{r echo = TRUE,error= FALSE,warning=FALSE,message=FALSE,results="hide"}
 attach(student_data_no_zeroes)
 ```
 
@@ -211,8 +206,11 @@ plot(linear_model_2)
 We can see that after removing the outliers, the assumption of normality is met. In addition, for the residual plot the assumption of constant error variance and independence is met. Since removing the students who received a 0 for their final grade are clearly outliers and affect our model greatly, we will continue with the subset of the data without zeroes in the grades when adding other variables into the model.
 
 
-```{r}
+```{r echo = TRUE,error= FALSE,warning=FALSE,message=FALSE,results="hide"}
 attach(student_data_with_zeroes)
+```
+
+```{r}
 hist(age)
 ```
 
@@ -220,8 +218,11 @@ hist(age)
 Now we study the relationship with absences and G3 to see if the effect of the outliers
 
 
-```{r}
+```{r echo = TRUE,error= FALSE,warning=FALSE,message=FALSE,results="hide"}
 attach(student_data)
+```
+
+```{r}
 linear_model_3 = lm(G3~absences)
 summary(linear_model_3)
 ```
@@ -230,8 +231,12 @@ summary(linear_model_3)
 plot(linear_model_3)
 ```
 
-```{r}
+```{r echo = TRUE,error= FALSE,warning=FALSE,message=FALSE,results="hide"}
 attach(student_data_no_zeroes)
+```
+
+
+```{r}
 linear_model_4 = lm(G3~absences)
 summary(linear_model_4)
 ```
@@ -241,12 +246,18 @@ plot(linear_model_4)
 ```
 
 
-
-
-## Logistic model with Internet and G3
+## Finding our Best Model
 
 ```{r}
-logistic_model =glm(internet~G3, family = "binomial")
+
+```
+
+
+## Logistic model with Absences and Activities
+
+
+```{r}
+logistic_model =glm(activities~absences, family = "binomial")
 logistic_model
 ```
 
@@ -254,9 +265,33 @@ logistic_model
 summary(logistic_model)
 ```
 
+insignficant
+
+```{r}
+ggplot(data = student_data_no_zeroes) +
+  geom_boxplot(aes(x = absences, y = activities,group = as.factor(activities), color = as.factor(activities)))
+```
+
 ```{r}
 prob = predict(logistic_model, type = "response")
 ```
+
+```{r}
+ggplot(data = student_data_no_zeroes) +
+  geom_point(mapping = aes (x = absences, y = prob, colour = as.factor(activities))) +
+  geom_hline(yintercept = .5, colour = "red") +
+  labs(y = "Pr(Activities = \"has extracirricular activites\" | absences)")
+```
+
+Our plot confirms that activities does not increase the probablity of having extracirricular activities. 
+
+
+
+
+
+
+
+
 
 
 
