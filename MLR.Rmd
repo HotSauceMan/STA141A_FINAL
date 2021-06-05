@@ -1,0 +1,456 @@
+---
+title: "Multiple Linear Regression"
+author: "Anchal Lamba"
+date: "6/02/2021"
+output: html_document
+---
+
+## Importing Dataset
+
+Here is our imported dataset.
+
+```{r}
+urlfile <- "https://raw.githubusercontent.com/HotSauceMan/STA141A_FINAL/main/student-por.csv"
+
+student_data <- read.csv(url(urlfile))
+```
+
+# Data Cleaning
+
+Here is our data cleaning section. Our first step of data cleaning was to convert the "yes" and "no"'s into 0's and 1's. 
+
+## Schoolsup Column 
+
+School sup column is extra educational support. 
+
+```{r}
+student_data$schoolsup <- ifelse(student_data$schoolsup == 'yes', 1, 0)
+student_data$schoolsup
+```
+
+## Famsup column
+
+Family sup column is for extra family support
+
+```{r}
+student_data$famsup <- ifelse(student_data$famsup == 'yes', 1, 0)
+student_data$famsup
+```
+
+
+## Paid column
+
+Paid column is for extra paid classes for course subjects. 
+
+```{r}
+student_data$paid <- ifelse(student_data$paid == 'yes', 1, 0)
+student_data$paid
+```
+
+
+## Activities column
+
+```{r}
+student_data$activities <- ifelse(student_data$activities == 'yes', 1, 0)
+student_data$activities
+```
+
+## Nursery Column
+
+```{r}
+student_data$nursery <- ifelse(student_data$nursery == 'yes', 1, 0)
+student_data$nursery
+```
+
+## Higher Column
+
+```{r}
+student_data$higher <- ifelse(student_data$higher == 'yes', 1, 0)
+student_data$higher
+```
+
+## Internet Column 
+
+```{r}
+student_data$internet <- ifelse(student_data$internet == 'yes', 1, 0)
+student_data$internet
+```
+
+## Romantic Column
+
+```{r}
+student_data$romantic <- ifelse(student_data$romantic == 'yes', 1, 0)
+student_data$romantic
+```
+
+<p>&nbsp;</p>
+## Multiple Linear Regression
+
+We are performing multiple linear regression to understand the relationship between a student's final grade and quantitative/qualitative predictors. Since 33 predictors are too much to work with, we have decided to choose 8 of them based on their hypothesized relevance to the final grade (G3). 
+
+**X1 = absences**: we hypothesize that a greater number of absences would negatively impact the final grade, as the student is in school and learning for less time.   
+
+**X2 = internet**: we hypothesize that having internet access would enable the student to perform better than without it, as it is essential to completing assignments and studying for exams well.  
+
+**X3 = health**: we hypothesize that having better health would positively impact the student's final grade.
+   
+**X4 = studentsup**: we hypothesize that having extra educational support would positively impact the student's final grade, as they have more educational resources to perform better.   
+
+**X5 = studytime**: we hypothesize that having greater study time would positively impact the student's grade, as they are more familiar with the content that is presented on exams.   
+
+**X6 = higher**: we hypothesize that a student wanting higher education would want to perform better in school and thus, have a higher final grade.   
+
+**X7 = activities**: we hypothesize that a student participating in more extracurricular activities will have less time to focus on school work, which would negatively impact the student's final grade.   
+
+**X8 = romantic**: we hypothesize that a student in a romantic relationship will have less time to focus on school work, which would negatively impact the student's final grade.   
+
+<p>&nbsp;</p>
+#### Data Preparation
+For model selection and data analysis, we will create a new dataset with the 8 predictor variables we are interested in. Additionally, we will remove any zeroes from the final grade column, as we are considering them as missing values in our dataset.
+
+```{r}
+# Y = final grade (G3)
+# X1 = absences (0 to 93)
+# X2 = internet (1 = yes, 0 = no)
+# X3 = health (1-3 = 0, 4-5 = 1)
+# X4 = schoolsup (1 = yes, 0 = no)
+# X5 = studytime (0 = <2 hours, 1 = >2 hours)
+# X6 = higher
+# X7 = activities
+# X8 = romantic
+
+# Binary Classification
+X3_bin = mean(student_data$health) #3.53621
+X5_bin = mean(student_data$studytime) #1.930663
+
+student_data$health <- ifelse(student_data$health == 1 | student_data$health == 2 | student_data$health == 3, 0, 1)
+student_data$studytime <- ifelse(student_data$studytime < 2, 0, 1)
+
+# Setup
+student_data_no_zeroes <- student_data[-c(which(student_data$G3 == 0)),]
+Y = student_data_no_zeroes$G3 # response variable
+X1 = student_data_no_zeroes$absences # the next 8 lines are predictor variables
+X2 = student_data_no_zeroes$internet
+X3 = student_data_no_zeroes$health
+X4 = student_data_no_zeroes$schoolsup
+X5 = student_data_no_zeroes$studytime
+X6 = student_data_no_zeroes$higher
+X7 = student_data_no_zeroes$activities
+X8 = student_data_no_zeroes$romantic
+n = dim(student_data_no_zeroes)[1] # number of observations
+
+student_data_new = data.frame(cbind(Y, X1, X2, X3, X4, X5, X6, X7, X8)) # new data set
+# student_data_new <- student_data_new[-c(which(Y == 0)),]
+student_data_new[1:5,]
+
+```
+
+Above is a preview of the new data set.
+
+<p>&nbsp;</p>
+### II. Model Diagnostics
+After preparing the data, model assumptions should be verified and plots must be prepared to identify gross data errors, as well as extreme outliers. The three model assumptions are: linearity, equal variance, and normality. If one of these assumptions is violated by the data, then the results of the regression model may be unreliable or misleading.
+
+<p>&nbsp;</p>
+#### Check Model Assumptions
+```{r}
+# Check model assumptions
+model1 = lm(Y~., data=student_data_new)
+par(mfrow=c(2,2))
+plot(model1)
+```
+
+Based on the above plots, the following observations can be made:
+
+The ***"Residuals vs Fitted"*** plot has a relatively straight horizontal line around zero, so the linearity assumption holds pretty well. The graph has a scale of 5, and the points are clustered loosely around the line of 0. However, the right half of the graph has a lot more points clustered further away from the line than the left half of the graph, putting the equal variance assumption under question.    
+In the ***"Normal QQ"*** plot, the points follow the reference line quite well, and there is barely any deviation (except for the labeled outliers). The normality assumption holds. 
+In the ***"Scale-Location"*** plot, the red reference line is not completely horizontal and most points deviate significantly from the line. The assumption for equal variance is under question.    
+In the ***"Residuals vs Leverage"*** plot, all the points are within Cook's distance, indicating that there are no extreme outliers in this dataset.    
+
+
+<p>&nbsp;</p>
+#### Transform Response Variable
+
+Based on the violation of the above model assumptions, it is appropriate to transform the response variable so that the data meets the assumptions better for our model-building process. A prominent function in this transformation process is boxcox(), a function used to compute the optimal power transformation based on the specified objective. The standard assumptions are: (1) the error terms $\epsilon_i$ come from a normal distribution with mean 0, and (2) the variance is the same for all error terms, independent of the predictor variables.
+
+<p>&nbsp;</p>
+```{r}
+library(MASS)
+boxcox(model1)
+```
+
+For the Box-Cox transformation, a $\lambda$ value of 1 is equivalent to using the original data. Therefore, if the confidence interval for the optimal $\lambda$ includes 1, then no transformation is necessary. However, since our model's curve is centered at 1, no transformation is necessary.   
+
+<p>&nbsp;</p>
+#### Consideration of Interaction Terms
+At this stage of data preparation, it is important to explore the possibility of interaction variables in the model. While interaction variables make the model more complex, the real world behaves in a way where relationships occur among predictor variables in addition to the response variable. We can formally test this possibility with a hypothesis test. 
+
+```{r}
+# Consider whether to put in interaction terms
+
+# Possible interaction terms are: X1X2, X1X3, X1X4, X1X5, X1X6, X1X7, X1X8, X2X3, X2X4, X2X5, X2X6, X2X7, X2X8, X3X4, X3X5, X3X6, X3X7, X3X8, X4X5, X4X6, X4X7, X4X8, X5X6, X5X7, X5X8, X6X7, X6X8, X7X8
+
+X1X2 = X1*X2 ; X1X3 = X1*X3 ; X1X4 = X1*X4 ; X1X5 = X1*X5 ; X1X6 = X1*X6 ; X1X7 = X1*X7 ; X1X8 = X1*X8 ; X2X3 = X2*X3 ; X2X4 = X2*X4 ; X2X5 = X2*X5 ; X2X6 = X2*X6 ; X2X7 = X2*X7 ; X2X8 = X2*X8 ; X3X4 = X3*X4 ; X3X5 = X3*X5 ; X3X6 = X3*X6 ; X3X7 = X3*X7 ; X3X8 = X3*X8 ; X4X5 = X4*X5 ; X4X6 = X4*X6 ; X4X7 = X4*X7 ; X4X8 = X4*X8 ; X5X6 = X5*X6 ; X5X7 = X5*X7 ; X5X8 = X5*X8 ; X6X7 = X6*X7 ; X6X8 = X6*X8 ; X7X8 = X7*X8 ; 
+
+student_data_interactions = data.frame(cbind(Y, X1, X2, X3, X4, X5, X6, X7, X8, X1X2, X1X3, X1X4, X1X5, X1X6, X1X7, X1X8, X2X3, X2X4, X2X5, X2X6, X2X7, X2X8, X3X4, X3X5, X3X6, X3X7, X3X8, X4X5, X4X6, X4X7, X4X8, X5X6, X5X7, X5X8, X6X7, X6X8, X7X8))
+
+# Full model
+ModelF = lm(Y~., data=student_data_interactions)
+SSE_F = sum(ModelF$residuals^2) # sum of squared errors for the full model
+df_F = n-37 # degrees of freedom for the full model
+
+# Reduced model
+ModelR = lm(Y~., data=student_data_new)
+SSE_R = sum(ModelR$residuals^2)
+df_R = n-9
+
+f_stat_3 = (SSE_R-SSE_F)/(df_R-df_F)/(SSE_F/df_F) # calculating f statistic
+f_stat_3
+
+f_critical_3 = qf(0.95, df_R-df_F, df_F) # for level of significance a=0.05
+f_critical_3
+```
+**Null hypothesis**: $\beta_{12} = \beta_{13} = ... = \beta_{36} = 0$ (coefficients of interaction variables)    
+**Alternative hypothesis**: not all $\beta_{12}$, $\beta_{13}$, ... , and $\beta_{36}$ equal to 0   
+**F statistic**: 1.021577   
+**F critical value**: +/- 1.495266   
+**Null distribution of the F statistic**: We use the F statistic $\frac{MSR(X_1X_2,X_1X_3,...,X_{7}X_{8}|X_1,X_2,...,X_{7}X_{8})}{MSE(X_1,X_2...X_{7}X_{8})}$, with degrees of freedom n - p (p = 37) for the full model and n - q (q = 9) for the reduced model; when determining a conclusion in the hypothesis, we only tabulate the positive critical value   
+**Conclusion**: We fail to reject the null hypothesis for this model. Since the absolute value of the F statistic is less than the critical value of 1.495266, there is sufficient evidence at the significance level of 0.05 to conclude that there is not a strong relationship between the interaction variables and the response variable. In other words, the data associated with the interaction variables does not have a profound effect on the model. We should not include them in the model because of this profound effect.   
+
+<p>&nbsp;</p>
+### III. Model Splitting
+By far the preferred method to validate a regression model is through the collection of new data. However, this is not practical nor feasible in our situation. An alternative when the data set is large enough is to split the data into two sets. Data splitting in effect is an attempt to simulate replication of the study. We will split the data into two data sets: (1) training and (2) validation. The training data set will be used in "IV Model Selection" and the validation data set will replicate our findings in "V Model Validation."
+
+```{r}
+set.seed(100)  # include set.seed for reproducibility
+ids = sample(1:634, 317)
+data_training = student_data_new[ids,] # training data set
+
+set.seed(100)
+ids2 = sample(1:634, 318)
+data_validation = student_data_new[-ids2,] # validation data set
+```
+
+<p>&nbsp;</p>
+### IV. Model Selection
+As we have a pool of 8 potential predictor variables, the use of a "best" subsets algorithm is not feasible. An automatic search procedure called step() develops the "best" model based on the subset of variables that minimize the model selection criteria of AIC and BIC.
+
+<p>&nbsp;</p>
+#### Stepwise algorithm with first-order models (AIC)
+```{r, results=FALSE, warning=FALSE}
+#Best model determined by AIC
+
+Y = data_training[,1]
+n_train = dim(data_training)[1]
+mydata_train = cbind(Y,data=data_training[2:9])
+
+model0_train = lm(Y~1, data=mydata_train)
+modelF_train = lm(Y~., data=mydata_train)
+
+step(model0_train, scope=list(lower=model0_train, upper=modelF_train), direction="both") # AIC of 544.11
+# Y ~ data.X6 + data.X5 + data.X4 + data.X1 + data.X7 + data.X3
+step(modelF_train, scope=list(lower=model0_train, upper=modelF_train), direction="both") # AIC of 544.11
+# Y ~ data.X1 + data.X3 + data.X4 + data.X5 + data.X6 + data.X7
+
+# Therefore, model0_train has the smallest AIC and is the best model
+sel1 = lm(Y~., data = data.frame(cbind(Y, X1, X3, X4, X5, X6, X7)))
+
+```
+Based on the stepwise algorithm, the "best" model, or the model with the greatest minimization of AIC is the initial model: $Y_i = \beta_0 + \beta_1{X_1} + \beta_3{X_3} + \beta_4{X_4} + \beta_5{X_5} + \beta_6{X_6} + \beta_7{X_7} + \epsilon_i$
+
+
+<p>&nbsp;</p>
+#### Stepwise algorithm with first-order models (BIC)
+```{r,results=FALSE, warning=FALSE}
+# Best model determined by BIC
+
+step(model0_train, scope=list(lower=model0_train, upper=modelF_train), direction="both", k = log(n_train)) # BIC of 566.35
+# Y ~ data.X6 + data.X5 + data.X4 + data.X1
+step(modelF_train, scope=list(lower=model0_train, upper=modelF_train), direction="both", k = log(n_train)) # BIC of 566.35
+# Y ~ data.X1 + data.X4 + data.X5 + data.X6
+
+# Therefore, Y ~ data.X1 + data.X4 + data.X5 + data.X6 has the smallest BIC and is the best model
+sel2 = lm(Y~., data = data.frame(cbind(Y, X1, X4, X5, X6)))
+```
+Based on the stepwise algorithm, the "best" model, or the model with the greatest minimization of BIC is the full model: $Y_i = \beta_0 + \beta_1{X_1} + \beta_4{X_4} + \beta_5{X_5} + \beta_6{X_6} + \epsilon_i$
+
+<p>&nbsp;</p>
+### V. Model Validation
+As previously stated, a data set was created for validating the model obtained in the model selection process (using the training data set). While there are a variety of methods of examining the validity of the regression model against the new data, we will be re-estimating the model using the validation data set. The estimated regression coefficients and various characteristics of the fitted model will be then compared for consistency to those of the regression model based on the training data set. If the results are consistent, they provide strong support that the chosen regression model is applicable under broader circumstances than those related to the original data.
+
+<p>&nbsp;</p>
+#### Stepwise algorithm with first-order models (AIC)
+```{r, results=FALSE, warning=FALSE}
+# Replicate the model selection process with the validation dataset; results should ideally be similar in comparison
+
+Y = data_validation[,1]
+n_val = dim(data_validation)[1]
+
+mydata_val = cbind(Y,data=data_validation[2:9])
+
+# Best model determined by AIC
+model0_val = lm(Y~1, data=mydata_val)
+modelF_val = lm(Y~., data=mydata_val)
+
+step(model0_val, scope=list(lower=model0_val, upper=modelF_val), direction="both") # AIC of 588.42
+# Y ~ data.X6 + data.X5 + data.X2 + data.X1 + data.X4 + data.X8
+step(modelF_val, scope=list(lower=model0_val, upper=modelF_val), direction="both") # AIC of 588.42
+# Y ~ data.X1 + data.X2 + data.X4 + data.X5 + data.X6 + data.X8
+
+# Therefore, modelF_val has the smallest AIC and is the best model
+sel3 = lm(Y~., data = data.frame(cbind(Y, X1, X2, X4, X5, X6, X8)))
+```
+Based on the stepwise algorithm, the "best" model, or the model with the greatest minimization of AIC is the full model: $Y_i = \beta_0 + \beta_1{X_1} + \beta_2{X_2} + \beta_4{X_4} + \beta_5{X_5} + \beta_6{X_6} + \beta_8{X_8} + \epsilon_i$
+
+<p>&nbsp;</p>
+#### Stepwise algorithm with first-order models (BIC)
+```{r,results=FALSE, warning=FALSE}
+# Best model determined by BIC
+
+step(model0_val, scope=list(lower=model0_val, upper=modelF_val), direction="both", k = log(n_val)) # BIC of 612.88
+# Y ~ data.X6 + data.X5 + data.X2 + data.X1
+step(modelF_val, scope=list(lower=model0_val, upper=modelF_val), direction="both", k = log(n_val)) # BIC of 612.88
+# Y ~ data.X1 + data.X2 + data.X5 + data.X6
+
+# Therefore, data.X2 + data.X5 + data.X6 has the smallest BIC and is the best model
+sel4 = lm(Y~., data = data.frame(cbind(Y, X1, X2, X5, X6)))
+```
+Based on the stepwise algorithm, the "best" model, or the model with the greatest minimization of BIC is the full model: $Y_i = \beta_0 + \beta_1{X_1} + \beta_2{X_2} + \beta_5{X_5} + \beta_6{X_6} + \epsilon_i$
+
+There are evident discrepancies between the training and validation models (minimization of AIC and BIC respectively). Thus, we can only determine the best model based on its conformity to the model assumptions. In other words, we have to review the plots of the four models we obtained from the training and validation datasets respectively. 
+
+<p>&nbsp;</p>
+```{r}
+par(mfrow=c(2,2)) # models from the training data set
+plot(sel1)
+plot(sel2)
+
+par(mfrow=c(2,2)) # models from the validation data set
+plot(sel3)
+plot(sel4)
+```
+
+The plots of the first model have better conformity to the model assumptions we have discussed earlier. Based on this information, the best regression model for this dataset is: $Y_i = \beta_0 + \beta_1{X_1} + \beta_3{X_3} + \beta_4{X_4} + \beta_5{X_5} + \beta_6{X_6} + \beta_7{X_7} + \epsilon_i$
+
+<p>&nbsp;</p>
+### VI. Model Analysis
+
+We want to validate our "best model" and test if the predictors we obtained have a significant effect on the original model. Since we don't have the time to test every single predictor, we will choose the three highest correlation coefficients and perform hypothesis testing. In context, the final grade is most explained by the number of absences, hours of study time, and if the student wants a higher education.
+
+```{r}
+cor <- cor(student_data_new)
+# install.packages("pander")
+library(pander) # may need to install package ’pander’ to make the table below
+
+Predictor <- c("X1","X5","X6")
+Coefficient <- c(-0.19603148,0.23510505, 0.33678018)
+ATable <- rbind(Predictor, Coefficient)
+pander(ATable, caption="Correlation of the Best Model Variables")
+```
+
+<p>&nbsp;</p>
+## Hypothesis Testing 
+
+<p>&nbsp;</p>
+Test whether $\beta_1 = 0$ at the 0.05 significance level.
+
+```{r}
+model = lm(Y~., data=student_data_new)
+summary(model)
+
+se_1 = summary(model)$coefficients[2,"Std. Error"] # finding the standard error based on coefficients in the summary table
+beta_1 = summary(model)$coefficients[2,"Estimate"] # finding the standard error based on coefficients in the summary table
+t_stat_1 = beta_1/se_1 # t statistic
+t_stat_1
+alpha = 0.05 # level of significance
+p = 9 # degrees of freedom
+level = 1-(alpha/2)
+t_critical_1 = qt(level,n-p) # t critical value 
+t_critical_1
+```
+
+**Null hypothesis**: $\beta_1 = 0$  
+**Alternative hypothesis**: $\beta_1 \ne 0$  
+**T statistic**: -4.016709  
+**T critical value**: +/- 1.963767   
+**Null distribution of the T statistic**: We use the t statistic with T distribution of 1-$\frac{\alpha}{2}$ and degrees of freedom n - p (p = 9); when determining a conclusion in the hypothesis, we only tabulate the positive critical value   
+**Conclusion**: We reject the null hypothesis for this model. Since the absolute value of the t statistic is greater than the critical value of 1.963767, there is sufficient evidence at the significance level of 0.05 to conclude that there is a relationship between the predictor variable (X1) and the response variable (Y). In other words, the data associated with the number of absences has a profound effect on the model.  
+
+<p>&nbsp;</p>
+Test whether $\beta_5 = 0$ at the 0.05 significance level.
+
+```{r}
+se_1 = summary(model)$coefficients[6,"Std. Error"] # finding the standard error based on coefficients in the summary table
+beta_1 = summary(model)$coefficients[6,"Estimate"] # finding the standard error based on coefficients in the summary table
+t_stat_1 = beta_1/se_1 # t statistic
+t_stat_1
+alpha = 0.05 # level of significance
+p = 9 # degrees of freedom
+level = 1-(alpha/2)
+t_critical_1 = qt(level,n-p) # t critical value 
+t_critical_1
+```
+
+**Null hypothesis**: $\beta_5 = 0$  
+**Alternative hypothesis**: $\beta_5 \ne 0$  
+**T statistic**: 4.425521   
+**T critical value**: +/- 1.963767    
+**Null distribution of the T statistic**: We use the t statistic with T distribution of 1-$\frac{\alpha}{2}$ and degrees of freedom n - p (p = 9); when determining a conclusion in the hypothesis, we only tabulate the positive critical value   
+**Conclusion**: We reject the null hypothesis for this model. Since the absolute value of the t statistic is greater than the critical value of 1.963767, there is sufficient evidence at the significance level of 0.05 to conclude that there is a relationship between the predictor variable (X5) and the response variable (Y). In other words, the data associated with hours of study time has a profound effect on the model.  
+
+<p>&nbsp;</p>
+Test whether $\beta_6 = 0$ at the 0.05 significance level.
+
+```{r}
+se_1 = summary(model)$coefficients[7,"Std. Error"] # finding the standard error based on coefficients in the summary table
+beta_1 = summary(model)$coefficients[7,"Estimate"] # finding the standard error based on coefficients in the summary table
+t_stat_1 = beta_1/se_1 # t statistic
+t_stat_1
+alpha = 0.05 # level of significance
+p = 9 # degrees of freedom
+level = 1-(alpha/2)
+t_critical_1 = qt(level,n-p) # t critical value 
+t_critical_1
+```
+
+**Null hypothesis**: $\beta_6 = 0$  
+**Alternative hypothesis**: $\beta_6 \ne 0$  
+**T statistic**: 7.403976   
+**T critical value**: +/- 1.963767    
+**Null distribution of the T statistic**: We use the t statistic with T distribution of 1-$\frac{\alpha}{2}$ and degrees of freedom n - p (p = 9); when determining a conclusion in the hypothesis, we only tabulate the positive critical value   
+**Conclusion**: We reject the null hypothesis for this model. Since the absolute value of the t statistic is greater than the critical value of 1.963767, there is sufficient evidence at the significance level of 0.05 to conclude that there is a relationship between the predictor variable (X6) and the response variable (Y). In other words, the data associated with intent of a higher education has a profound effect on the model.  
+
+
+<p>&nbsp;</p>
+## Analysis
+We will now calculate the p-value of the F-test, $R^2$ and adjusted $R^2$ values to analyze the validity of our best model in context of our dataset.
+
+```{r}
+Y = student_data_no_zeroes$G3
+
+# F-test
+tss <- sum((Y-mean(Y))^2)
+rss <- sum(sel1$res^2)
+F <- ((tss-rss)/3)/(rss/sel1$df.residual)
+pf(F,6,627,lower.tail=FALSE)
+
+# r-squared
+tss <- sum((Y-mean(Y))^2)
+rss <- sum(sel1$res^2)
+rsq <- 1-rss/tss
+rsq
+
+# adjusted r-squared
+1-(1-rsq)*((634-1)/sel1$df.residual)
+
+```
+The p-value of the F-test is 1.248614e-21, indicating a strong relationship between the response and predictors in the best model.   
+ 
+The $R^2$ value for this model is 0.08802433. This implies that 8.8% of the variation in the final grade (G3) can be explained by the model.   
+
+The $R^2$ value is also close to the adjusted $R^2$ value of 0.07929729, which indicates that the value of $R^2$ is not inflated by the predictors.
+
+## Appendix Code
+
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
